@@ -1,35 +1,33 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { ClientTableComponent } from './client-table/client-table.component';
-import { ClientService, Client } from './client.service';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ClientFormComponent } from './client-form/client-form.component';
+import { Client } from './client.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ClientTableComponent, CommonModule, FormsModule],
+  imports: [CommonModule, RouterOutlet, ClientTableComponent, ClientFormComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'managyment-front';
-  showCreateForm = false;
-  newClient: Omit<Client, 'id' | 'createdAt' | 'updatedAt'> = {
-    name: '',
-    cpf: '',
-    email: '',
-    phoneNumber: '',
-    age: 0
-  };
+  formOpen = false;
+  editingClient: Client | null = null;
 
-  constructor(private clientService: ClientService) {}
+  openCreate(): void {
+    this.editingClient = null;
+    this.formOpen = true;
+  }
 
-  onCreateClient(): void {
-    const clientData = { ...this.newClient, age: +this.newClient.age };
-    this.clientService.createClient(clientData).subscribe(() => {
-      this.showCreateForm = false;
-      // Atualizar a tabela de clientes
-    });
+  openEdit(client: Client): void {
+    this.editingClient = client;
+    this.formOpen = true;
+  }
+
+  closeForm(): void {
+    this.formOpen = false;
+    this.editingClient = null;
   }
 }

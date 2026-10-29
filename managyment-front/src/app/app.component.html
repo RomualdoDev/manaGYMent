@@ -1,18 +1,37 @@
-<h1 class="table-title">Clientes</h1>
-
-<button (click)="showCreateForm = !showCreateForm">Cadastrar Cliente</button>
-
-<div *ngIf="showCreateForm">
-  <h2>Cadastrar Novo Cliente</h2>
-  <form (ngSubmit)="onCreateClient()">
-    <input [(ngModel)]="newClient.name" name="name" placeholder="Nome" required>
-    <input [(ngModel)]="newClient.cpf" name="cpf" placeholder="CPF" required>
-    <input [(ngModel)]="newClient.email" name="email" placeholder="Email" required>
-    <input [(ngModel)]="newClient.phoneNumber" name="phoneNumber" placeholder="Telefone" required>
-    <input type="number" [(ngModel)]="newClient.age" name="age" placeholder="Idade" required>
-    <button type="submit">Salvar</button>
-  </form>
+<div class="brand-bar">
+  <div class="brand-bar-inner">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="color: var(--accent)">
+      <path d="M6 6v12M18 6v12M3 9v6M21 9v6M6 12h12"/>
+    </svg>
+    <span class="brand-name">Manag<span>yment</span></span>
+  </div>
 </div>
 
-<app-client-table></app-client-table>
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Clientes</h1>
+      <p>Cadastre, edite e acompanhe seus clientes</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreate()">+ Novo cliente</button>
+  </header>
+
+  <app-client-table (edit)="openEdit($event)"></app-client-table>
+</main>
+
+<div class="modal-backdrop" *ngIf="formOpen" (click)="closeForm()">
+  <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h2>{{ editingClient ? 'Editar cliente' : 'Novo cliente' }}</h2>
+      <button type="button" class="icon-btn" aria-label="Fechar" (click)="closeForm()">&times;</button>
+    </header>
+
+    <app-client-form
+      [client]="editingClient"
+      (saved)="closeForm()"
+      (cancelled)="closeForm()"
+    ></app-client-form>
+  </div>
+</div>
+
 <router-outlet />

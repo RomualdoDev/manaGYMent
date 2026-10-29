@@ -1,57 +1,121 @@
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+<section class="card">
+  <div class="toolbar">
+    <input
+      class="search"
+      type="search"
+      placeholder="Buscar por nome, CPF ou email"
+      [(ngModel)]="filter"
+      (ngModelChange)="applyFilter()"
+    />
+    <span class="count" *ngIf="!loading && clients.length">
+      {{ filteredClients.length }} de {{ clients.length }}
+    </span>
+  </div>
 
-  <!-- Name Column -->
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef> Name </th>
-    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-  </ng-container>
+  <p class="form-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
 
-  <!-- CPF Column -->
-  <ng-container matColumnDef="cpf">
-    <th mat-header-cell *matHeaderCellDef> CPF </th>
-    <td mat-cell *matCellDef="let element"> {{element.cpf}} </td>
-  </ng-container>
+  <p class="empty" *ngIf="loading">Carregando clientes...</p>
+  <p class="empty" *ngIf="!loading && !clients.length && !errorMessage">
+    Nenhum cliente cadastrado ainda.
+  </p>
+  <p class="empty" *ngIf="!loading && clients.length && !filteredClients.length">
+    Nenhum resultado para "{{ filter }}".
+  </p>
 
-  <!-- Email Column -->
-  <ng-container matColumnDef="email">
-    <th mat-header-cell *matHeaderCellDef> Email </th>
-    <td mat-cell *matCellDef="let element"> {{element.email}} </td>
-  </ng-container>
+  <div class="table-wrap" *ngIf="filteredClients.length">
+    <table mat-table [dataSource]="filteredClients" class="clients-table">
 
-  <!-- Phone Number Column -->
-  <ng-container matColumnDef="phoneNumber">
-    <th mat-header-cell *matHeaderCellDef> Phone Number </th>
-    <td mat-cell *matCellDef="let element"> {{element.phoneNumber}} </td>
-  </ng-container>
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let client">
+          <div class="person">
+            <span class="avatar">{{ initials(client.name) }}</span>
+            <span class="person-name">{{ client.name }}</span>
+          </div>
+        </td>
+      </ng-container>
 
-  <!-- Age Column -->
-  <ng-container matColumnDef="age">
-    <th mat-header-cell *matHeaderCellDef> Age </th>
-    <td mat-cell *matCellDef="let element"> {{element.age}} </td>
-  </ng-container>
+      <!-- CPF Column -->
+      <ng-container matColumnDef="cpf">
+        <th mat-header-cell *matHeaderCellDef>CPF</th>
+        <td mat-cell *matCellDef="let client" class="muted">{{ formatCpf(client.cpf) }}</td>
+      </ng-container>
 
-  <!-- Actions Column -->
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef> Ações </th>
-    <td mat-cell *matCellDef="let element">
-      <button (click)="showClientDetails(element.cpf)">Ver Detalhes</button>
-    </td>
-  </ng-container>
+      <!-- Email Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let client">{{ client.email }}</td>
+      </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+      <!-- Phone Number Column -->
+      <ng-container matColumnDef="phoneNumber">
+        <th mat-header-cell *matHeaderCellDef>Telefone</th>
+        <td mat-cell *matCellDef="let client" class="muted">{{ formatPhone(client.phoneNumber) }}</td>
+      </ng-container>
 
-<div *ngIf="selectedClient" class="popup">
-  <div class="popup-content">
-    <span class="close" (click)="closePopup()">&times;</span>
-    <h2>Detalhes do Cliente</h2>
-    <p><strong>Nome:</strong> {{selectedClient.name}}</p>
-    <p><strong>CPF:</strong> {{selectedClient.cpf}}</p>
-    <p><strong>Email:</strong> {{selectedClient.email}}</p>
-    <p><strong>Telefone:</strong> {{selectedClient.phoneNumber}}</p>
-    <p><strong>Idade:</strong> {{selectedClient.age}}</p>
-    <p><strong>Criado em:</strong> {{selectedClient.createdAt | date}}</p>
-    <p><strong>Atualizado em:</strong> {{selectedClient.updatedAt | date}}</p>
+      <!-- Age Column -->
+      <ng-container matColumnDef="age">
+        <th mat-header-cell *matHeaderCellDef>Idade</th>
+        <td mat-cell *matCellDef="let client">{{ client.age }}</td>
+      </ng-container>
+
+      <!-- Billing Day Column -->
+      <ng-container matColumnDef="billingDay">
+        <th mat-header-cell *matHeaderCellDef>Vencimento</th>
+        <td mat-cell *matCellDef="let client">
+          <div class="billing">
+            <span class="billing-day">{{ client.billingDay }}</span>
+            <span class="muted">próx. {{ formatDayMonth(client.nextDueDate) }}</span>
+            <span class="badge" *ngIf="isDueToday(client)">Vence hoje</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="actions-head">Ações</th>
+        <td mat-cell *matCellDef="let client" class="actions">
+          <button type="button" class="btn btn-ghost btn-sm" (click)="showClientDetails(client)">Detalhes</button>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="edit.emit(client)">Editar</button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="remove(client)">Excluir</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</section>
+
+<div class="modal-backdrop" *ngIf="selectedClient" (click)="closePopup()">
+  <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div class="person">
+        <span class="avatar avatar-lg">{{ initials(selectedClient.name) }}</span>
+        <div>
+          <h2>{{ selectedClient.name }}</h2>
+          <span class="muted">{{ formatCpf(selectedClient.cpf) }}</span>
+        </div>
+      </div>
+      <button type="button" class="icon-btn" aria-label="Fechar" (click)="closePopup()">&times;</button>
+    </header>
+
+    <dl class="details">
+      <dt>Email</dt>
+      <dd>{{ selectedClient.email }}</dd>
+      <dt>Telefone</dt>
+      <dd>{{ formatPhone(selectedClient.phoneNumber) }}</dd>
+      <dt>Idade</dt>
+      <dd>{{ selectedClient.age }}</dd>
+      <dt>Dia de vencimento</dt>
+      <dd>{{ selectedClient.billingDay }}</dd>
+      <dt>Próximo vencimento</dt>
+      <dd>{{ formatDate(selectedClient.nextDueDate) }}</dd>
+      <dt>Cadastrado em</dt>
+      <dd>{{ selectedClient.createdAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+      <dt>Atualizado em</dt>
+      <dd>{{ selectedClient.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</dd>
+    </dl>
   </div>
 </div>
