@@ -1,4 +1,4 @@
-import { dueBillingDays, nextDueDate, parseDateOnly, toDateOnly } from './billing';
+import { dueBillingDays, nextDueDate, parseDateOnly, toDateOnly, todayIn } from './billing';
 
 // Months are 1-based here so the tests read naturally: d(2027, 2, 28) is 28 February 2027.
 const d = (year: number, month: number, day: number) => new Date(year, month - 1, day);
@@ -65,5 +65,14 @@ describe('parseDateOnly', () => {
     expect(parseDateOnly('abc')).toBeNull();
     expect(parseDateOnly('2027-02-30')).toBeNull();
     expect(parseDateOnly('27/02/2027')).toBeNull();
+  });
+});
+
+describe('todayIn', () => {
+  it('uses the academy calendar day, not the UTC day', () => {
+    // 23:30 in Brasília on 10 March 2026 is 02:30 UTC on 11 March.
+    const now = new Date('2026-03-11T02:30:00Z');
+    expect(todayIn('America/Sao_Paulo', now)).toBe('2026-03-10');
+    expect(todayIn('UTC', now)).toBe('2026-03-11');
   });
 });

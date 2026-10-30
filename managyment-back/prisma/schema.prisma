@@ -22,3 +22,18 @@ model Client {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
 }
+
+model SmsNotification {
+  id                Int      @id @default(autoincrement())
+  clientCpf         String
+  dueDate           String // YYYY-MM-DD
+  phoneNumber       String
+  message           String
+  status            String // PENDING | SENT | FAILED | SKIPPED
+  error             String?
+  providerMessageId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
+
+  @@unique([clientCpf, dueDate])
+}
