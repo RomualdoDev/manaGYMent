@@ -5,6 +5,7 @@ import { SmsProvider } from 'src/sms/sms-provider';
 
 type Row = {
   id: number;
+  gymId: number;
   clientCpf: string;
   dueDate: string;
   phoneNumber: string;
@@ -15,22 +16,26 @@ type Row = {
   updatedAt: Date;
 };
 
-// In-memory stand-in for the smsNotification table, enforcing the (clientCpf, dueDate) unique key.
+type UniqueKey = { gymId: number; clientCpf: string; dueDate: string };
+
+// In-memory stand-in for the smsNotification table, enforcing the (gymId, clientCpf, dueDate) unique key.
 function fakePrisma() {
   const rows: Row[] = [];
   let nextId = 1;
-  const find = (where: { id?: number; clientCpf_dueDate?: { clientCpf: string; dueDate: string } }) =>
+  const find = (where: { id?: number; gymId_clientCpf_dueDate?: UniqueKey }) =>
     rows.find((row) =>
       where.id !== undefined
         ? row.id === where.id
-        : row.clientCpf === where.clientCpf_dueDate?.clientCpf && row.dueDate === where.clientCpf_dueDate?.dueDate,
+        : row.gymId === where.gymId_clientCpf_dueDate?.gymId &&
+          row.clientCpf === where.gymId_clientCpf_dueDate?.clientCpf &&
+          row.dueDate === where.gymId_clientCpf_dueDate?.dueDate,
     );
 
   return {
     rows,
     smsNotification: {
       create: async ({ data }: { data: Omit<Row, 'id' | 'error' | 'providerMessageId' | 'updatedAt'> & Partial<Row> }) => {
-        if (find({ clientCpf_dueDate: { clientCpf: data.clientCpf, dueDate: data.dueDate } })) {
+        if (find({ gymId_clientCpf_dueDate: { gymId: data.gymId, clientCpf: data.clientCpf, dueDate: data.dueDate } })) {
           throw new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
             code: 'P2002',
             clientVersion: '6.0.1',
@@ -40,8 +45,7 @@ function fakePrisma() {
         rows.push(row);
         return row;
       },
-      findUnique: async ({ where }: { where: { clientCpf_dueDate: { clientCpf: string; dueDate: string } } }) =>
-        find(where) ?? null,
+      findUnique: async ({ where }: { where: { gymId_clientCpf_dueDate: UniqueKey } }) => find(where) ?? null,
       updateMany: async ({ where, data }: { where: Partial<Row>; data: Partial<Row> }) => {
         const matches = rows.filter(
           (row) =>
@@ -61,7 +65,8 @@ function fakePrisma() {
   };
 }
 
-const dueClient = (overrides: Partial<{ cpf: string; name: string; phoneNumber: string }> = {}) => ({
+const dueClient = (overrides: Partial<{ gymId: number; cpf: string; name: string; phoneNumber: string }> = {}) => ({
+  gymId: 1,
   cpf: '52998224725',
   name: 'Ana Souza',
   phoneNumber: '11999999999',
@@ -143,6 +148,7 @@ describe('PaymentReminderService', () => {
     const { service, prisma, send } = setup([dueClient()]);
     prisma.rows.push({
       id: 99,
+      gymId: 1,
       clientCpf: '52998224725',
       dueDate: '2026-11-10',
       phoneNumber: '11999999999',
@@ -163,6 +169,7 @@ describe('PaymentReminderService', () => {
     const { service, prisma, send } = setup([dueClient()]);
     prisma.rows.push({
       id: 98,
+      gymId: 1,
       clientCpf: '52998224725',
       dueDate: '2026-11-10',
       phoneNumber: '11999999999',

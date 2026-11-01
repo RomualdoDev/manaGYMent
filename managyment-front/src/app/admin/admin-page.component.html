@@ -1,0 +1,83 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Academias</h1>
+      <p>Cadastre academias e os donos que vão acessar o sistema</p>
+    </div>
+  </header>
+
+  <section class="credentials-card" *ngIf="issued" role="status">
+    <div>
+      <strong>{{ issued.title }}</strong>
+      <p>Entregue estes dados ao dono. <b>A senha não será exibida novamente.</b></p>
+      <dl>
+        <dt>Usuário</dt>
+        <dd>{{ issued.username }}</dd>
+        <dt>Senha temporária</dt>
+        <dd class="password">{{ issued.temporaryPassword }}</dd>
+      </dl>
+      <p class="hint">O dono vai precisar trocar essa senha no primeiro acesso.</p>
+    </div>
+    <div class="credentials-actions">
+      <button type="button" class="btn btn-secondary" (click)="copyPassword()">
+        {{ copied ? 'Senha copiada' : 'Copiar senha' }}
+      </button>
+      <button type="button" class="btn btn-ghost" (click)="dismissCredentials()">Já anotei</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Nova academia</h2>
+    <form class="gym-form" [formGroup]="form" (ngSubmit)="createGym()">
+      <label>
+        <span>Nome da academia</span>
+        <input type="text" formControlName="name" />
+      </label>
+      <label>
+        <span>Nome do dono</span>
+        <input type="text" formControlName="ownerName" />
+      </label>
+      <label>
+        <span>Usuário do dono (opcional)</span>
+        <input type="text" formControlName="ownerUsername" placeholder="Gerado a partir do nome da academia" />
+      </label>
+      <p class="form-error" *ngIf="formError" role="alert">{{ formError }}</p>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || creating">
+        {{ creating ? 'Criando...' : 'Criar academia' }}
+      </button>
+    </form>
+  </section>
+
+  <p class="form-error" *ngIf="listError" role="alert">{{ listError }}</p>
+  <p class="empty" *ngIf="loading">Carregando...</p>
+  <p class="empty" *ngIf="!loading && gyms.length === 0">Nenhuma academia cadastrada ainda.</p>
+
+  <section class="card gym" *ngFor="let gym of gyms">
+    <header class="gym-header">
+      <div>
+        <h2>{{ gym.name }}</h2>
+        <span class="status" [class.inactive]="!gym.active">{{ gym.active ? 'Ativa' : 'Inativa' }}</span>
+        <span class="count">{{ gym.clientCount }} cliente(s)</span>
+      </div>
+      <button type="button" class="btn btn-sm btn-ghost" (click)="toggleGym(gym)">
+        {{ gym.active ? 'Desativar' : 'Ativar' }}
+      </button>
+    </header>
+
+    <table class="users">
+      <tr *ngFor="let user of gym.users">
+        <td>{{ user.name }}</td>
+        <td><code>{{ user.username }}</code></td>
+        <td>
+          <span class="pending" *ngIf="user.mustChangePassword">troca de senha pendente</span>
+        </td>
+        <td class="actions">
+          <button type="button" class="btn btn-sm btn-secondary" (click)="resetPassword(user)">Redefinir senha</button>
+        </td>
+      </tr>
+      <tr *ngIf="gym.users.length === 0">
+        <td colspan="4" class="empty">Nenhum usuário</td>
+      </tr>
+    </table>
+  </section>
+</main>

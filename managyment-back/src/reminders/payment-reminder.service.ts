@@ -36,7 +36,7 @@ export class PaymentReminderService {
       try {
         const phone = toE164(client.phoneNumber);
         const message = buildReminderMessage(client.name, date);
-        const reservation = await this.reserve(client.cpf, date, client.phoneNumber, message);
+        const reservation = await this.reserve(client.gymId, client.cpf, date, client.phoneNumber, message);
         if (!reservation) {
           summary.alreadySent++;
           continue;
@@ -70,6 +70,7 @@ export class PaymentReminderService {
   // Claims the (client, due date) slot before sending. Returns null when another run
   // already sent it or is still sending it. FAILED and stale PENDING slots can be claimed again.
   private async reserve(
+    gymId: number,
     cpf: string,
     dueDate: string,
     phoneNumber: string,
@@ -77,7 +78,7 @@ export class PaymentReminderService {
   ): Promise<{ id: number } | null> {
     try {
       const created = await this.prisma.smsNotification.create({
-        data: { clientCpf: cpf, dueDate, phoneNumber, message, status: 'PENDING' },
+        data: { gymId, clientCpf: cpf, dueDate, phoneNumber, message, status: 'PENDING' },
       });
       return { id: created.id };
     } catch (error) {
@@ -87,7 +88,7 @@ export class PaymentReminderService {
     }
 
     const existing = await this.prisma.smsNotification.findUnique({
-      where: { clientCpf_dueDate: { clientCpf: cpf, dueDate } },
+      where: { gymId_clientCpf_dueDate: { gymId, clientCpf: cpf, dueDate } },
     });
     if (!existing || !this.isClaimable(existing)) {
       return null;

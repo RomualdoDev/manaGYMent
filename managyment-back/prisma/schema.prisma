@@ -10,8 +10,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Gym {
+  id        Int      @id @default(autoincrement())
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  users     User[]
+  clients   Client[]
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  username           String   @unique
+  name               String
+  passwordHash       String
+  role               String // ADMIN | STAFF
+  mustChangePassword Boolean  @default(true)
+  active             Boolean  @default(true)
+  gymId              Int? // null para ADMIN
+  gym                Gym?     @relation(fields: [gymId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @default(now()) @updatedAt
+}
+
 model Client {
-  cpf         String  @id @default(uuid())
+  gymId       Int
+  cpf         String
   name        String?
   age         Int?
   size        Int?
@@ -21,10 +46,14 @@ model Client {
   billingDay  Int      @default(10)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  gym         Gym      @relation(fields: [gymId], references: [id])
+
+  @@id([gymId, cpf])
 }
 
 model SmsNotification {
   id                Int      @id @default(autoincrement())
+  gymId             Int
   clientCpf         String
   dueDate           String // YYYY-MM-DD
   phoneNumber       String
@@ -35,5 +64,5 @@ model SmsNotification {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now()) @updatedAt
 
-  @@unique([clientCpf, dueDate])
+  @@unique([gymId, clientCpf, dueDate])
 }

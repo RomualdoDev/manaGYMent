@@ -1,0 +1,22 @@
+<main class="auth-page">
+  <form class="auth-card" [formGroup]="form" (ngSubmit)="submit()">
+    <h1>Entrar</h1>
+    <p class="auth-hint">Use o usuário e a senha informados pelo administrador.</p>
+
+    <label class="auth-field">
+      <span>Usuário</span>
+      <input type="text" formControlName="username" autocomplete="username" autofocus />
+    </label>
+
+    <label class="auth-field">
+      <span>Senha</span>
+      <input type="password" formControlName="password" autocomplete="current-password" />
+    </label>
+
+    <p class="form-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+
+    <button type="submit" class="btn btn-primary auth-submit" [disabled]="form.invalid || submitting">
+      {{ submitting ? 'Entrando...' : 'Entrar' }}
+    </button>
+  </form>
+</main>

@@ -1,0 +1,26 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <h1>Clientes</h1>
+      <p>Cadastre, edite e acompanhe seus clientes</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openCreate()">+ Novo cliente</button>
+  </header>
+
+  <app-client-table (edit)="openEdit($event)"></app-client-table>
+</main>
+
+<div class="modal-backdrop" *ngIf="formOpen" (click)="closeForm()">
+  <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="modal-header">
+      <h2>{{ editingClient ? 'Editar cliente' : 'Novo cliente' }}</h2>
+      <button type="button" class="icon-btn" aria-label="Fechar" (click)="closeForm()">&times;</button>
+    </header>
+
+    <app-client-form
+      [client]="editingClient"
+      (saved)="closeForm()"
+      (cancelled)="closeForm()"
+    ></app-client-form>
+  </div>
+</div>

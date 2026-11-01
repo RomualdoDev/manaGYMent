@@ -1,0 +1,134 @@
+.credentials-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--warning-soft);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+
+  p {
+    margin: 6px 0;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 16px;
+    margin: 12px 0;
+  }
+
+  dt {
+    color: var(--text-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .password {
+    font-family: monospace;
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  .hint {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+}
+
+.credentials-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-self: center;
+}
+
+.card {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+
+  h2 {
+    margin: 0 0 12px;
+  }
+}
+
+.gym-form {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  input {
+    padding: 10px 12px;
+    font: inherit;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .form-error {
+    grid-column: 1 / -1;
+  }
+}
+
+.gym-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    display: inline;
+    margin-right: 12px;
+  }
+}
+
+.status {
+  padding: 2px 8px;
+  margin-right: 8px;
+  font-size: 12px;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 999px;
+
+  &.inactive {
+    background: var(--danger);
+  }
+}
+
+.users {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+
+  td {
+    padding: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .pending {
+    font-size: 12px;
+    color: var(--warning);
+  }
+
+  .actions {
+    text-align: right;
+  }
+}
+
+.empty {
+  color: var(--text-muted);
+}

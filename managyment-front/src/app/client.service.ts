@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { API_URL } from './api';
 
 export interface Client {
   cpf: string;
@@ -41,7 +42,7 @@ export function extractErrorMessage(error: unknown): string {
   providedIn: 'root'
 })
 export class ClientService {
-  private apiUrl = 'http://localhost:3000/clients';
+  private apiUrl = `${API_URL}/clients`;
   private changes = new Subject<void>();
 
   // Emits whenever the list changes (create, update or delete), so the screens reload.
